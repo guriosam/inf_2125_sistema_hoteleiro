@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 import system.Menu;
 import system.SistemaHoteleiro;
-import utils.Util;
+import utils.DateUtil;
 
 public class HotelMain {
 

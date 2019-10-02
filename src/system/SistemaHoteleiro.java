@@ -8,7 +8,7 @@ import entities.Apartamento;
 import entities.Cliente;
 import entities.Reserva;
 import entities.TipoApartamento;
-import utils.Util;
+import utils.DateUtil;
 
 public class SistemaHoteleiro {
 
@@ -24,9 +24,9 @@ public class SistemaHoteleiro {
 		this.clientes = new ArrayList<>();
 		this.caixaMensal = new HashMap<>();
 
-		preencherReservas();
-		preencherApartamentos();
 		preencherClientes();
+		preencherApartamentos();
+		preencherReservas();
 	}
 
 	private void preencherClientes() {
@@ -38,11 +38,24 @@ public class SistemaHoteleiro {
 	}
 
 	private void preencherReservas() {
-		reservas.add(new Reserva(103, 10, Util.somarDatas(Util.dataAtual(), 3), Util.somarDatas(Util.dataAtual(), 7), 2,
-				false));
-		reservas.add(new Reserva(104, 1, Util.dataAtual(), Util.somarDatas(Util.dataAtual(), 2), 3, true));
-		reservas.add(new Reserva(101, 4, Util.somarDatas(Util.dataAtual(), -1), Util.somarDatas(Util.dataAtual(), 3), 4,
-				true));
+		Reserva r = new Reserva(103, 10, DateUtil.somarDatas(DateUtil.dataAtual(), 3), DateUtil.somarDatas(DateUtil.dataAtual(), 7), 2,
+				false);
+		reservas.add(r);
+		
+		r = new Reserva(104, 1, DateUtil.dataAtual(), DateUtil.somarDatas(DateUtil.dataAtual(), 2), 3, true);
+		reservas.add(r);
+		Apartamento apt = buscarQuarto(1, 0);
+		if (apt != null) {
+			apt.setCodCliente(104);
+			apt.setHospedeExtra(true);
+		}
+		r = new Reserva(101, 4, DateUtil.somarDatas(DateUtil.dataAtual(), -1), DateUtil.somarDatas(DateUtil.dataAtual(), 3), 4, true);
+		reservas.add(r);
+
+		apt = buscarQuarto(4, 0);
+		if (apt != null) {
+			apt.setCodCliente(101);
+		}
 
 	}
 
@@ -60,9 +73,9 @@ public class SistemaHoteleiro {
 	}
 
 	public void realizarReservaOuCheckIn(int codCliente, int codApart, String dataEntra, String dataSai,
-			int numHospedes) {
+			int numHospedes, boolean ehReserva) {
 
-		Reserva reserva = new Reserva(codCliente, codApart, dataEntra, dataSai, numHospedes, false);
+		Reserva reserva = new Reserva(codCliente, codApart, dataEntra, dataSai, numHospedes, ehReserva);
 
 		Cliente cliente = buscarCliente(codCliente);
 
@@ -72,7 +85,7 @@ public class SistemaHoteleiro {
 		}
 
 		if (possuiReserva(codCliente)) {
-			reserva = buscarReserva(codCliente);
+			reserva = buscarReservaPorCliente(codCliente);
 			reserva.setFezCheckIn(true);
 			System.out.println("Check-In Realizado!");
 			return;
@@ -87,7 +100,7 @@ public class SistemaHoteleiro {
 			reservas.remove(reservaParaRemover);
 		}
 
-		if (Util.diasEntreDatas(dataEntra, dataSai, "/") <= 0) {
+		if (DateUtil.diasEntreDatas(dataEntra, dataSai, "/") <= 0) {
 			System.out.println("As datas inseridas são inválidas.");
 			return;
 		}
@@ -97,7 +110,13 @@ public class SistemaHoteleiro {
 			return;
 		}
 
-		cliente.getReservas().add(reserva);
+		if (ehReserva) {
+			System.out.println("Reserva efetuada com sucesso.");
+		} else {
+			reserva.setFezCheckIn(true);
+			System.out.println("Check-In efetuado com sucesso.");
+		}
+
 		reservas.add(reserva);
 
 	}
@@ -121,7 +140,7 @@ public class SistemaHoteleiro {
 			System.out.println("Não existe cliente cadastrado com esse código.");
 			return;
 		}
-		Reserva checkout = buscarReserva(codCliente);
+		Reserva checkout = buscarReservaPorCliente(codCliente);
 
 		if (checkout == null) {
 			System.out.println("Não existe nenhum cliente com esse código hospedado nesse momento.");
@@ -129,19 +148,20 @@ public class SistemaHoteleiro {
 		}
 
 		int codQuarto = checkout.getCodigoQuarto();
-		Apartamento quarto = buscarQuarto(codQuarto);
+		Apartamento quarto = buscarQuarto(codQuarto, codCliente);
 
 		if (quarto == null) {
-			System.out.println("Não existe nenhum quarto cadastrado com esse código.");
+			System.out.println("Não existe nenhum quarto alocado para esse código de cliente.");
 			return;
 		}
 
 		double valorDiaria = quarto.getDiaria();
 
-		int dias = Util.diasEntreDatas(checkout.getDataEntra(), checkout.getDataSai(), "/");
+		int dias = DateUtil.diasEntreDatas(checkout.getDataEntra(), checkout.getDataSai(), "/");
+
 		double valorDevido = dias * valorDiaria;
 
-		String dataAtual = Util.dataAtual();
+		String dataAtual = DateUtil.dataAtual();
 		String[] data = dataAtual.split("/");
 
 		double caixaDoHotel = caixaMensal.get(data[1]);
@@ -151,9 +171,13 @@ public class SistemaHoteleiro {
 		System.out.println("Relatório de Check-Out\n\n" + cliente.toString() + quarto.toString() + checkout.toString()
 				+ "Valor Total da Estadia: " + valorDevido + "\n");
 
+		quarto.getHistorico().add(checkout);
+		cliente.getHistorico().add(checkout);
+		reservas.remove(checkout);
+
 	}
 
-	private Cliente buscarCliente(int codCliente) {
+	public Cliente buscarCliente(int codCliente) {
 		for (Cliente cliente : clientes) {
 			if (cliente.getCodigo() == codCliente) {
 				return cliente;
@@ -162,10 +186,16 @@ public class SistemaHoteleiro {
 		return null;
 	}
 
-	private Apartamento buscarQuarto(int codQuarto) {
+	public Apartamento buscarQuarto(int codQuarto, int codCliente) {
 		for (Apartamento apt : apartamentos) {
 			if (apt.getCodigo() == codQuarto) {
-				return apt;
+				if (codCliente == 0) {
+					return apt;
+				}
+
+				if (codCliente == apt.getCodCliente()) {
+					return apt;
+				}
 			}
 		}
 
@@ -183,14 +213,14 @@ public class SistemaHoteleiro {
 					return true;
 				}
 
-				if (Util.diasEntreDatas(Util.dataAtual(), r.getDataEntra(), "/") == 0) {
+				if (DateUtil.diasEntreDatas(DateUtil.dataAtual(), r.getDataEntra(), "/") == 0) {
 					reservaParaRemover = r;
 					return false;
 				}
 
-				int diasEntreReservas = Util.diasEntreDatas(dataEntra, r.getDataEntra(), "/");
+				int diasEntreReservas = DateUtil.diasEntreDatas(dataEntra, r.getDataEntra(), "/");
 
-				int diasNovaReserva = Util.diasEntreDatas(dataEntra, dataSai, "/");
+				int diasNovaReserva = DateUtil.diasEntreDatas(dataEntra, dataSai, "/");
 
 				if (diasEntreReservas <= diasNovaReserva) {
 					return true;
@@ -202,9 +232,19 @@ public class SistemaHoteleiro {
 		return false;
 	}
 
-	private Reserva buscarReserva(int codCliente) {
+	public Reserva buscarReservaPorCliente(int codCliente) {
 		for (Reserva r : reservas) {
 			if (r.getCodigoCliente() == codCliente) {
+				return r;
+			}
+		}
+
+		return null;
+	}
+	
+	public Reserva buscarReservaPorQuarto(int codQuarto) {
+		for (Reserva r : reservas) {
+			if (r.getCodigoQuarto() == codQuarto) {
 				return r;
 			}
 		}
@@ -214,7 +254,7 @@ public class SistemaHoteleiro {
 
 	private boolean possuiReserva(int codCliente) {
 
-		if (buscarReserva(codCliente) == null) {
+		if (buscarReservaPorCliente(codCliente) == null) {
 			return false;
 		}
 
@@ -228,15 +268,15 @@ public class SistemaHoteleiro {
 		relatorio += "Número de Quartos: " + apartamentos.size() + "\n";
 		int ocupados = 0;
 		for (Apartamento apt : apartamentos) {
-			if (apt.isOcupado()) {
+			if (apt.getCodCliente() != 0) {
 				ocupados++;
 			}
 		}
 
-		String dataAtual = Util.dataAtual();
+		String dataAtual = DateUtil.dataAtual();
 		String[] data = dataAtual.split("/");
 
-		double caixaDoHotel = caixaMensal.get(data[1]);
+		double caixaDoHotel = caixaMensal.getOrDefault((data[1]), 0.0);
 
 		relatorio += "Quartos Ocupados: " + ocupados + "\n";
 		relatorio += "Valor Total Recebido No Mês: " + caixaDoHotel + "\n";

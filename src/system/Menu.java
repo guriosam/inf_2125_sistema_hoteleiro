@@ -1,9 +1,12 @@
 package system;
 
-import java.util.Date;
+import java.awt.font.GraphicAttribute;
 
+import entities.Apartamento;
+import entities.Cliente;
+import entities.Reserva;
 import utils.IO;
-import utils.Util;
+import utils.DateUtil;
 
 public class Menu {
 
@@ -41,25 +44,11 @@ public class Menu {
 
 		if (reserva == 1) {
 
-			grandeHotel.realizarReservaOuCheckIn(codCliente, -1, "", "", -1);
+			grandeHotel.realizarReservaOuCheckIn(codCliente, -1, "", "", -1, false);
 
 		} else {
 
-			System.out.println("Agora vou precisar do número do quarto.\n");
-
-			int codQuarto = IO.receberEntradaNumero();
-
-			System.out.println("Por favor me informe qual a data prevista de saída.");
-
-			String dataSaida = IO.receberEntradaData();
-
-			System.out.println("Quantas pessoas irão ficar hospedadas no quarto?");
-
-			int qntHospedes = IO.receberEntradaNumero();
-
-			System.out.println("Só um minuto enquanto verifico a disponibilidade...");
-
-			grandeHotel.realizarReservaOuCheckIn(codCliente, codQuarto, Util.dataAtual(), dataSaida, qntHospedes);
+			informacoesAdicionais(codCliente, false);
 
 		}
 
@@ -67,28 +56,72 @@ public class Menu {
 
 	}
 
+	private void informacoesAdicionais(int codCliente, boolean b) {
+		System.out.println("Agora vou precisar do número do quarto.\n");
+
+		int codQuarto = IO.receberEntradaNumero();
+
+		System.out.println("Por favor me informe qual a data prevista de saída.");
+
+		String dataSaida = IO.receberEntradaData();
+
+		System.out.println("Quantas pessoas irão ficar hospedadas no quarto?");
+
+		int qntHospedes = IO.receberEntradaNumero();
+
+		System.out.println("Só um minuto enquanto verifico a disponibilidade...");
+
+		grandeHotel.realizarReservaOuCheckIn(codCliente, codQuarto, DateUtil.dataAtual(), dataSaida, qntHospedes, b);
+
+	}
+
 	public void mostrarMensagemCheckOut() {
-		
+		System.out.println("Para realizar o Check-Out por favor digite o código do Cliente.");
+		int input = IO.receberEntradaNumero();
+		grandeHotel.realizarCheckOut(input);
 	}
 
 	public void mostrarMensagemReserva() {
-		// TODO Auto-generated method stub
+		System.out.println("Para realizar uma reserva, por favor digite o código do cliente.");
+		int codCliente = IO.receberEntradaNumero();
+
+		informacoesAdicionais(codCliente, true);
 
 	}
 
 	public void mostrarMensagemConsultaCliente() {
-		// TODO Auto-generated method stub
+		System.out.println("Informe o código do cliente você gostaria de consultar.");
+		int codCliente = IO.receberEntradaNumero();
+
+		Cliente c = grandeHotel.buscarCliente(codCliente);
+		if (c != null) {
+			System.out.println(c.consulta());
+
+			Reserva r = grandeHotel.buscarReservaPorCliente(codCliente);
+
+			if (r != null) {
+				System.out.println("Reservas: ");
+				System.out.println(r.toString());
+			}
+
+		}
 
 	}
 
 	public void mostrarMensagemConsultaQuarto() {
-		// TODO Auto-generated method stub
+		System.out.println("Informe o código do quarto você gostaria de consultar.");
+		int codQuarto = IO.receberEntradaNumero();
 
-	}
-
-	public void gerarRelatorio() {
-		// TODO Auto-generated method stub
-
+		Apartamento apt = grandeHotel.buscarQuarto(codQuarto, 0);
+		System.out.println(apt);
+		
+		Reserva r = grandeHotel.buscarReservaPorQuarto(codQuarto);
+		if(r != null){
+			System.out.println("Reservas: ");
+			System.out.println(r);
+		}
+		
+		
 	}
 
 	private void selecionarTela(int input) {
@@ -110,13 +143,14 @@ public class Menu {
 			mostrarMensagemConsultaQuarto();
 			break;
 		case 6:
-			gerarRelatorio();
+			grandeHotel.relatorioHotel();
 			break;
 		default:
 			System.out.println("Opção Inválida! Por favor, tente novamente.");
-			mostrarMensagemInicial();
 
 		}
+
+		mostrarMensagemInicial();
 
 	}
 

@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-public class Util {
+public class DateUtil {
 
 	public static boolean verificarDatas(String date1, String date2, String splitter) {
 

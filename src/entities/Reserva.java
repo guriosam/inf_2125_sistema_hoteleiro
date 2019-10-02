@@ -66,19 +66,4 @@ public class Reserva {
 				+ "Número de Hóspedes: " + numHospedes + "\n";		
 	}
 	
-	
-	
-	
-	/*
-	Código do Cliente: 103
-	Número do Quarto: 10
-	Data de Entrada: Data Atual + cinco dias
-	Data de Saída: Data Atual + sete dias
-	Número de Hóspedes: 2
-*/
-	
-	
-			
-			
-	
 }

@@ -8,13 +8,13 @@ public class Cliente {
 	private String nome;
 	private int codigo;
 	private String telefone;
-	private List<Reserva> reservas;
+	private List<Reserva> historico;
 
 	public Cliente(String nome, int codigo, String telefone) {
 		this.nome = nome;
 		this.codigo = codigo;
 		this.telefone = telefone;
-		this.reservas = new ArrayList<>();
+		this.historico = new ArrayList<>();
 	}
 
 	public String getNome() {
@@ -41,8 +41,8 @@ public class Cliente {
 		this.telefone = telefone;
 	}
 
-	public List<Reserva> getReservas() {
-		return reservas;
+	public List<Reserva> getHistorico() {
+		return historico;
 	}
 
 	@Override
@@ -53,21 +53,21 @@ public class Cliente {
 	public String consulta() {
 		String resultado = toString() + "Telefone: " + telefone + "\n";
 
-		resultado += "Reservas:\n";
-		for (Reserva r : reservas) {
-			if (!r.isFezCheckIn()) {
-				resultado += r.toString();
-			}
-		}
+		//resultado += "Reservas:\n";
+		//for (Reserva r : reservas) {
+		//	if (!r.isFezCheckIn()) {
+		//		resultado += r.toString();
+		//	}
+		//}
 
 		resultado += "Histórico de Ocupações:\n";
-		for (Reserva r : reservas) {
+		for (Reserva r : historico) {
 			if (r.isFezCheckIn()) {
 				resultado += r.toString();
 			}
 		}
 
-		return resultado + "\n";
+		return resultado;
 
 	}
 

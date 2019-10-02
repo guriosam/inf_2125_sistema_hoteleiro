@@ -1,12 +1,17 @@
 package entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Apartamento {
 
 	private int codigo;
 	private TipoApartamento categoria;
 	private double diaria;
 	private int capacidade;
-	private boolean ocupado;
+	private int codCliente;
+	private boolean hospedeExtra;
+	private List<Reserva> historico;
 
 	public Apartamento(int codigo, TipoApartamento categoria, double diaria, int capacidade) {
 		super();
@@ -14,6 +19,7 @@ public class Apartamento {
 		this.categoria = categoria;
 		this.diaria = diaria;
 		this.capacidade = capacidade;
+		this.setHistorico(new ArrayList<>());
 	}
 
 	public int getCodigo() {
@@ -33,6 +39,10 @@ public class Apartamento {
 	}
 
 	public double getDiaria() {
+		if (hospedeExtra) {
+			return diaria * 1.3;
+		}
+
 		return diaria;
 	}
 
@@ -50,18 +60,40 @@ public class Apartamento {
 
 	@Override
 	public String toString() {
-
-		return "Informações do Quarto:\n" + "Número: " + codigo + "\n" + "Tipo: " + categoria + "\n"
+		
+		String consulta = "Informações do Quarto:\n" + "Número: " + codigo + "\n" + "Tipo: " + categoria.getTipo() + "\n"
 				+ "Valor da Diária: " + diaria + "\n";
 
+		for(Reserva r : historico){
+			consulta += r + "\n";
+		}
+		
+		return consulta;
+
 	}
 
-	public boolean isOcupado() {
-		return ocupado;
+	public List<Reserva> getHistorico() {
+		return historico;
 	}
 
-	public void setOcupado(boolean ocupado) {
-		this.ocupado = ocupado;
+	public void setHistorico(List<Reserva> historico) {
+		this.historico = historico;
+	}
+
+	public int getCodCliente() {
+		return codCliente;
+	}
+
+	public void setCodCliente(int codCliente) {
+		this.codCliente = codCliente;
+	}
+
+	public boolean isHospedeExtra() {
+		return hospedeExtra;
+	}
+
+	public void setHospedeExtra(boolean hospedeExtra) {
+		this.hospedeExtra = hospedeExtra;
 	}
 
 }

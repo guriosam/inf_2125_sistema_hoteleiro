@@ -26,19 +26,22 @@ public class IO {
 
 	public static String receberEntradaData() {
 
-		String input = scanner.next() + "";
+		String input = scanner.nextLine();
 
 		try {
-
-			scanner.close();
+			
+			if (input.matches("\\d{2}/\\d{2}/\\d{4}")) {
+				System.out.println(input);
+				return input;
+			}
+			
 		} catch (NumberFormatException e) {
 			System.out.println("Entrada Inválida! Por favor tente novamente.\n");
-			scanner.close();
 
-			return receberEntradaData();
+			
 		}
 
-		return "";
+		return receberEntradaData();
 
 	}
 
