@@ -5,12 +5,13 @@ import java.util.Scanner;
 
 public class IO {
 
-	private static Scanner scanner = new Scanner(System.in);
+	private static Scanner scanInt = new Scanner(System.in);
+	private static Scanner scanData = new Scanner(System.in);
 
 	public static int receberEntradaNumero() {
 
 		String input = "";
-		input = scanner.nextLine();
+		input = scanInt.nextLine();
 
 		System.out.println(input);
 		try {
@@ -26,7 +27,7 @@ public class IO {
 
 	public static String receberEntradaData() {
 
-		String input = scanner.nextLine();
+		String input = scanData.nextLine();
 
 		try {
 			

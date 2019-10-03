@@ -38,10 +38,10 @@ public class SistemaHoteleiro {
 	}
 
 	private void preencherReservas() {
-		Reserva r = new Reserva(103, 10, DateUtil.somarDatas(DateUtil.dataAtual(), 3), DateUtil.somarDatas(DateUtil.dataAtual(), 7), 2,
-				false);
+		Reserva r = new Reserva(103, 10, DateUtil.somarDatas(DateUtil.dataAtual(), 3),
+				DateUtil.somarDatas(DateUtil.dataAtual(), 7), 2, false);
 		reservas.add(r);
-		
+
 		r = new Reserva(104, 1, DateUtil.dataAtual(), DateUtil.somarDatas(DateUtil.dataAtual(), 2), 3, true);
 		reservas.add(r);
 		Apartamento apt = buscarQuarto(1, 0);
@@ -49,7 +49,8 @@ public class SistemaHoteleiro {
 			apt.setCodCliente(104);
 			apt.setHospedeExtra(true);
 		}
-		r = new Reserva(101, 4, DateUtil.somarDatas(DateUtil.dataAtual(), -1), DateUtil.somarDatas(DateUtil.dataAtual(), 3), 4, true);
+		r = new Reserva(101, 4, DateUtil.somarDatas(DateUtil.dataAtual(), -1),
+				DateUtil.somarDatas(DateUtil.dataAtual(), 3), 4, true);
 		reservas.add(r);
 
 		apt = buscarQuarto(4, 0);
@@ -84,10 +85,14 @@ public class SistemaHoteleiro {
 			return;
 		}
 
-		if (possuiReserva(codCliente)) {
-			reserva = buscarReservaPorCliente(codCliente);
-			reserva.setFezCheckIn(true);
-			System.out.println("Check-In Realizado!");
+		if (ehReserva) {
+			if (possuiReserva(codCliente)) {
+				reserva = buscarReservaPorCliente(codCliente);
+				reserva.setFezCheckIn(true);
+				System.out.println("Check-In Realizado!");
+			} else {
+				System.out.println("Você não possui uma reserva.");
+			}
 			return;
 		}
 
@@ -102,6 +107,8 @@ public class SistemaHoteleiro {
 
 		if (DateUtil.diasEntreDatas(dataEntra, dataSai, "/") <= 0) {
 			System.out.println("As datas inseridas são inválidas.");
+			System.out.println(dataEntra);
+			System.out.println(dataSai);
 			return;
 		}
 
@@ -116,7 +123,11 @@ public class SistemaHoteleiro {
 			reserva.setFezCheckIn(true);
 			System.out.println("Check-In efetuado com sucesso.");
 		}
-
+		
+		Apartamento apt = buscarQuarto(reserva.getCodigoQuarto(), 0);
+		if(apt != null){
+			apt.setCodCliente(codCliente);
+		}
 		reservas.add(reserva);
 
 	}
@@ -146,7 +157,12 @@ public class SistemaHoteleiro {
 			System.out.println("Não existe nenhum cliente com esse código hospedado nesse momento.");
 			return;
 		}
-
+		
+		if(!checkout.isFezCheckIn()){
+			System.out.println("Você não realizou check-in.");
+			return;
+		}
+		
 		int codQuarto = checkout.getCodigoQuarto();
 		Apartamento quarto = buscarQuarto(codQuarto, codCliente);
 
@@ -157,16 +173,16 @@ public class SistemaHoteleiro {
 
 		double valorDiaria = quarto.getDiaria();
 
-		int dias = DateUtil.diasEntreDatas(checkout.getDataEntra(), checkout.getDataSai(), "/");
+		int dias = DateUtil.diasEntreDatas(checkout.getDataEntra(), DateUtil.dataAtual(), "/");
 
 		double valorDevido = dias * valorDiaria;
 
 		String dataAtual = DateUtil.dataAtual();
 		String[] data = dataAtual.split("/");
-
-		double caixaDoHotel = caixaMensal.get(data[1]);
+		
+		double caixaDoHotel = caixaMensal.getOrDefault(data[1] + data[2], 0.0);
 		caixaDoHotel += valorDevido;
-		caixaMensal.put(data[1], caixaDoHotel);
+		caixaMensal.put(data[1] + data[2], caixaDoHotel);
 
 		System.out.println("Relatório de Check-Out\n\n" + cliente.toString() + quarto.toString() + checkout.toString()
 				+ "Valor Total da Estadia: " + valorDevido + "\n");
@@ -174,6 +190,7 @@ public class SistemaHoteleiro {
 		quarto.getHistorico().add(checkout);
 		cliente.getHistorico().add(checkout);
 		reservas.remove(checkout);
+		quarto.setCodCliente(0);
 
 	}
 
@@ -241,7 +258,7 @@ public class SistemaHoteleiro {
 
 		return null;
 	}
-	
+
 	public Reserva buscarReservaPorQuarto(int codQuarto) {
 		for (Reserva r : reservas) {
 			if (r.getCodigoQuarto() == codQuarto) {
@@ -276,7 +293,7 @@ public class SistemaHoteleiro {
 		String dataAtual = DateUtil.dataAtual();
 		String[] data = dataAtual.split("/");
 
-		double caixaDoHotel = caixaMensal.getOrDefault((data[1]), 0.0);
+		double caixaDoHotel = caixaMensal.getOrDefault((data[1] + data[2]), 0.0);
 
 		relatorio += "Quartos Ocupados: " + ocupados + "\n";
 		relatorio += "Valor Total Recebido No Mês: " + caixaDoHotel + "\n";

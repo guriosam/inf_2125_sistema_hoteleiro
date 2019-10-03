@@ -1,10 +1,7 @@
 package start;
 
-import java.util.Scanner;
-
 import system.Menu;
 import system.SistemaHoteleiro;
-import utils.DateUtil;
 
 public class HotelMain {
 
@@ -14,7 +11,6 @@ public class HotelMain {
 
 		Menu menu = new Menu(grandeHotel);
 		menu.mostrarMensagemInicial();
-		
 
 	}
 

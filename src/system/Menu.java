@@ -1,6 +1,6 @@
 package system;
 
-import java.awt.font.GraphicAttribute;
+import java.util.Date;
 
 import entities.Apartamento;
 import entities.Cliente;
@@ -15,6 +15,7 @@ public class Menu {
 	public Menu(SistemaHoteleiro grandeHotel) {
 		this.grandeHotel = grandeHotel;
 	}
+	
 
 	public void mostrarMensagemInicial() {
 		System.out.println("Bem vindo ao Grande Hotel Budapeste");
@@ -48,15 +49,15 @@ public class Menu {
 
 		} else {
 
-			informacoesAdicionais(codCliente, false);
+			informacoesAdicionais(codCliente, DateUtil.dataAtual(), false);
 
 		}
 
-		selecionarTela(1);
+		selecionarTela(-1);
 
 	}
 
-	private void informacoesAdicionais(int codCliente, boolean b) {
+	private void informacoesAdicionais(int codCliente, String dataEntrada, boolean b) {
 		System.out.println("Agora vou precisar do número do quarto.\n");
 
 		int codQuarto = IO.receberEntradaNumero();
@@ -85,7 +86,11 @@ public class Menu {
 		System.out.println("Para realizar uma reserva, por favor digite o código do cliente.");
 		int codCliente = IO.receberEntradaNumero();
 
-		informacoesAdicionais(codCliente, true);
+		System.out.println("Por favor me informe qual a data prevista de entrada.");
+
+		String dataEntrada = IO.receberEntradaData();
+		
+		informacoesAdicionais(codCliente, dataEntrada, true);
 
 	}
 
@@ -113,7 +118,17 @@ public class Menu {
 		int codQuarto = IO.receberEntradaNumero();
 
 		Apartamento apt = grandeHotel.buscarQuarto(codQuarto, 0);
+		if(apt == null){
+			System.out.println("Não existe código com esse quarto.");
+			return;
+		}
 		System.out.println(apt);
+		
+		if(apt.getCodCliente() == 0){
+			System.out.println("O quarto está livre.");
+		} else {
+			System.out.println("O quarto está em uso nesse momento.");
+		}
 		
 		Reserva r = grandeHotel.buscarReservaPorQuarto(codQuarto);
 		if(r != null){
@@ -146,7 +161,6 @@ public class Menu {
 			grandeHotel.relatorioHotel();
 			break;
 		default:
-			System.out.println("Opção Inválida! Por favor, tente novamente.");
 
 		}
 

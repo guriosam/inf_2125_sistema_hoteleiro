@@ -18,31 +18,19 @@ public class DateUtil {
 
 		String[] d1 = date1.split(splitter);
 
-		Integer year1 = Integer.parseInt(d1[0]);
+		Integer year1 = Integer.parseInt(d1[2]);
 
 		Integer m1 = Integer.parseInt(d1[1]);
 
-		Integer day1 = Integer.parseInt(d1[2]);
-
-		Integer hour1 = Integer.parseInt(d1[3]);
-
-		Integer minute1 = Integer.parseInt(d1[4]);
-
-		Integer second1 = Integer.parseInt(d1[5]);
+		Integer day1 = Integer.parseInt(d1[1]);
 
 		String[] d2 = date2.split(splitter);
 
-		Integer year2 = Integer.parseInt(d2[0]);
+		Integer year2 = Integer.parseInt(d2[2]);
 
 		Integer m2 = Integer.parseInt(d2[1]);
 
-		Integer day2 = Integer.parseInt(d2[2]);
-
-		Integer hour2 = Integer.parseInt(d2[3]);
-
-		Integer minute2 = Integer.parseInt(d2[4]);
-
-		Integer second2 = Integer.parseInt(d2[5]);
+		Integer day2 = Integer.parseInt(d2[1]);
 
 		if (year1.compareTo(year2) > 0) {
 			return false;
@@ -53,17 +41,7 @@ public class DateUtil {
 				if (day1.compareTo(day2) > 0) {
 					return false;
 				} else if (day1.compareTo(day2) == 0) {
-					if (hour1.compareTo(hour2) > 0) {
-						return false;
-					} else if (hour1.compareTo(hour2) == 0) {
-						if (minute1.compareTo(minute2) > 0) {
-							return false;
-						} else if (minute1.compareTo(minute2) == 0) {
-							if (second1.compareTo(second2) > 0) {
-								return false;
-							}
-						}
-					}
+					return false;
 				}
 			}
 		}
@@ -76,22 +54,19 @@ public class DateUtil {
 
 		long diff = 0;
 
-		if (verificarDatas(data1, data2, divisor)) {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-
-			try {
-				Date firstDate = sdf.parse(data1);
-				Date secondDate = sdf.parse(data2);
-				long diffInMillies = Math.abs(secondDate.getTime() - firstDate.getTime());
-				diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-
-				System.out.println(diff);
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-
-			return (int) diff;
+		try {
+			Date firstDate = sdf.parse(data1);
+			Date secondDate = sdf.parse(data2);
+			long diffInMillies = Math.abs(secondDate.getTime() - firstDate.getTime());
+			diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		if(diff <= 0){
+			diff = 0;
 		}
 
 		return (int) diff;
